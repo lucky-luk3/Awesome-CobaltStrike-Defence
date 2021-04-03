@@ -51,6 +51,23 @@ python vol.py -f /mnt/d/Compartida/170121.raw --profile=Win10x64_19041 malfind
     * smartscreen.ex
     * OneDrive.exe
 * DETECTED primary process and spawned.
+### Malprocfind
+````
+C:\Python27\python.exe .\vol.py -f D:\Compartida\170121.raw --profile=Win10x64_19041 malprocfind
+````
+Nothing.
+
+#### Volatility 3
+````
+python .\vol.py -f  D:\Compartida\170121.raw windows.malfind.Malfind
+````
+Same results that Volatility 2
+````
+python .\vol.py -f  D:\Compartida\170121.raw windows.driverirp.DriverIrp #Driver IRP hook detection
+````
+
+
+
 
 ### Netscan
 ````
@@ -118,4 +135,37 @@ Jan 21, 2021 @ 21:10:01.639 notepad.exe     -                   12          HKLM
 Jan 21, 2021 @ 21:10:01.638 notepad.exe     -                   12          HKLM\System\CurrentControlSet\Services\Tcpip\Parameters
 Jan 21, 2021 @ 21:10:01.620 test.exe        notepad.exe         10          -  
 ```
+## Apihooks
+```
+C:\Python27\python.exe .\vol.py -f D:\Compartida\170121.raw --profile=Win10x64_19041 apihooks -p 1524 | Select-String "Function"
+```
+Imports in both Cobalt process are very similar. Hooks to "ADVAPI32.dll" are not so common.  
 
+```
+C:\Python27\python.exe .\vol.py -f D:\Compartida\170121.raw --profile=Win10x64_19041 apihooks | Select-String "Victim module: ADVAPI32.dll" -Context 1
+```
+Searching for other processes that hock the same functions in "ADVAPI32.dll" I found:
+* Sysmon64.exe
+* one svchost.exe
+* VGAuthService
+* Winlogbeat
+
+Suspicious hooks:
+* ADVAPI32.dll!CryptAcquireContextA
+* ADVAPI32.dll!CryptAcquireContextW
+* ADVAPI32.dll!CryptCreateHash
+* ADVAPI32.dll!CryptDestroyHash
+* ADVAPI32.dll!CryptDestroyKey
+* ADVAPI32.dll!CryptExportKey
+* ADVAPI32.dll!CryptGenRandom
+* ADVAPI32.dll!CryptGetDefaultProviderW
+* ADVAPI32.dll!CryptGetHashParam
+* ADVAPI32.dll!CryptHashData
+* ADVAPI32.dll!CryptImportKey
+* ADVAPI32.dll!CryptReleaseContext
+* ADVAPI32.dll!CryptSetHashParam
+* ADVAPI32.dll!CryptVerifySignatureW
+
+
+# References
+https://book.hacktricks.xyz/forensics/volatility-examples
